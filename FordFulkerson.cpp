@@ -23,7 +23,7 @@
 #define ve vector
 #define mp make_pair
 #define PI 3.14159265358979323846
-// #define int long long
+#define int long long
 // #define double long double
  
 using namespace std;
@@ -49,30 +49,30 @@ void precalc() {}
 struct edge {
     int to, capacity, flow;
 };
-
+ 
 ve<vi> g;
 ve<edge> edges;
 vi was;
-int s, t, k;
-
+int s, t;
+ 
 void add_edge(int x, int y, int c) {
     g[x].push_back(edges.size());
     edges.push_back({y, c, 0});
     g[y].push_back(edges.size());
     edges.push_back({x, 0, 0});
 }
-
+ 
 int res(int x) {
     return edges[x].capacity - edges[x].flow;
 }
-
+ 
 int dfs(int x, int f) {
     if (x == t) return f;
     if (was[x]) return 0;
     was[x] = 1;
     for (int y : g[x]) {
         int r = res(y);
-        if (r < k) continue;
+        if (r == 0) continue;
         int pushed = dfs(edges[y].to, min(r, f));
         if (pushed) {
             edges[y].flow += pushed;
@@ -85,19 +85,15 @@ int dfs(int x, int f) {
  
 int mf() {
     int res = 0;
-    rep(c, 14) {
-        k = (1 << c);
-        while (true) {
-            was.assign(g.size(), false);
-            int f = dfs(s, 1e18);
-            if (!f) break;
-            res += f;
-        }
-        
+    while (true) {
+        was.assign(g.size(), false);
+        int f = dfs(s, 1e18);
+        if (!f) break;
+        res += f;
     }
     return res;
 }
-
+ 
 void solve() {
     int n, m;
     cin >> n >> m;
