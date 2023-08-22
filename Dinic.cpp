@@ -23,7 +23,7 @@
 #define ve vector
 #define mp make_pair
 #define PI 3.14159265358979323846
-// #define int long long
+#define int long long
 // #define double long double
  
 using namespace std;
@@ -49,68 +49,89 @@ void precalc() {}
 struct edge {
     int to, capacity, flow;
 };
-
+ 
 ve<vi> g;
 ve<edge> edges;
-vi was;
+vi d, lst;
 int s, t, k;
-
+constexpr int INF = 1e18;
+ 
 void add_edge(int x, int y, int c) {
     g[x].push_back(edges.size());
     edges.push_back({y, c, 0});
     g[y].push_back(edges.size());
     edges.push_back({x, 0, 0});
 }
-
+ 
 int res(int x) {
     return edges[x].capacity - edges[x].flow;
 }
-
-int dfs(int x, int f) {
-    if (x == t) return f;
-    if (was[x]) return 0;
-    was[x] = 1;
-    for (int y : g[x]) {
-        int r = res(y);
-        if (r < k) continue;
-        int pushed = dfs(edges[y].to, min(r, f));
-        if (pushed) {
-            edges[y].flow += pushed;
-            edges[y ^ 1].flow -= pushed;
-            return pushed;
+ 
+bool bfs() {
+    d.resize(g.size());
+    rep(i, g.size()) d[i] = INF;
+    queue<int> q;
+    d[s] = 0;
+    q.push(s);
+    while (!q.empty()) {
+        int x = q.front(); q.pop();
+        for (int y : g[x]) {
+            if (res(y) == 0) continue;
+            int to = edges[y].to;
+            if (d[to] > d[x] + 1) {
+                d[to] = d[x] + 1;
+                q.push(to);
+            }
         }
     }
-    return 0;
+    if (d[t] == INF) return false;
+    return true;
 }
  
-int mf() {
+int dfs(int x, int flow) {
+    if (x == t) return flow;
+    int sum = 0;
+    for (; lst[x] < g[x].size(); lst[x]++) {
+        int e = g[x][lst[x]];
+        int r = res(e);
+        int to = edges[e].to;
+        if (r == 0 || d[to] != d[x] + 1) continue;
+        int pushed = dfs(to, min(flow - sum, r));
+        sum += pushed;
+        edges[e].flow += pushed;
+        edges[e ^ 1].flow -= pushed;
+        if (sum == flow) break;
+    }
+    return sum;
+}
+ 
+int dinic() {
     int res = 0;
-    for (int c = 14; c >= 0; c--) {
-        k = (1 << c);
+    while (true) {
+        if (!bfs()) break;
+        lst.assign(g.size(), 0);
         while (true) {
-            was.assign(g.size(), false);
-            int f = dfs(s, 1e18);
-            if (!f) break;
-            res += f;
+            int pushed = dfs(s, INF);
+            if (!pushed) break;
+            res += pushed;
         }
-
     }
     return res;
 }
-
+ 
 void solve() {
-    int n, m;
-    cin >> n >> m;
+    int n;
+    cin >> n;
     g.resize(n);
-    rep(i, m) {
-        int a, b, c;
-        cin >> a >> b >> c;
-        --a; --b;
-        add_edge(a, b, c);
-        // add_edge(b, a, c);
+    rep(i, n) {
+        rep(j, n) {
+            int c;
+            cin >> c;
+            add_edge(i, j, c);
+        }
     }
     s = 0, t = n - 1;
-    cout << mf() << "\n";
+    cout << dinic() << "\n";
 }
 
 signed main() {
