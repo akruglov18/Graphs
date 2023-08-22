@@ -129,34 +129,6 @@ int maxflow() {
 }
 
 void solve() {
-    int n;
-    cin >> n;
-    g.resize(2 * n + 2);
-    rep(i, n) {
-        rep(j, n) {
-            int x;
-            cin >> x;
-            add_edge(i + 1, j + 1 + n, 1, x);
-        }
-    }
-    s = 0;
-    t = 2 * n + 1;
-    rep(i, n) {
-        add_edge(0, i + 1, 1, 0);
-    }
-    rep(i, n) {
-        add_edge(i + n + 1, t, 1, 0);
-    }
-    int ans = maxflow();
-    cout << ans << '\n';
-    for (int i = 1; i <= n; i++){
-        for (auto j : g[i]){
-            if (j % 2) continue;
-            if (edges[j].flow) {
-                cout << edges[j].to - n << ' ';
-            }
-        }
-    }
 }
 
 signed main() {
